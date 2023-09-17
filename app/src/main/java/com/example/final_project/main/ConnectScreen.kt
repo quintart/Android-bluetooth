@@ -4,6 +4,7 @@ package com.example.final_project.main
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,14 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.final_project.adapter.BtAdapter
-import com.example.final_project.viewModel.switchBT
+import com.example.btmodule.mylib.adapter.BtAdapter
+import com.example.btmodule.mylib.SwitchViewModel.SwitchBT
 
 @Composable
 fun ConnectScreen(context: Context) {
     val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
-    switchBT.myCheck = remember {
+    SwitchBT.myCheck = remember {
         mutableStateOf(
             value = if (mBluetoothAdapter.isEnabled) {
                 "On"
@@ -38,7 +39,7 @@ fun ConnectScreen(context: Context) {
         )
     }
 
-    switchBT.mCheckState = remember { mutableStateOf(value = mBluetoothAdapter.isEnabled) }
+    SwitchBT.mCheckState = remember { mutableStateOf(value = mBluetoothAdapter.isEnabled) }
 
 
     Row(
@@ -55,22 +56,24 @@ fun ConnectScreen(context: Context) {
     ) {
 
         Text(
-            text = switchBT.myCheck!!.value, /*color = mycolor.value,*/
+            text = SwitchBT.myCheck!!.value, /*color = mycolor.value,*/
             fontSize = 25.sp,
             modifier = Modifier.align(Alignment.CenterVertically),
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.weight(1f))
-        Switch(checked = switchBT.mCheckState!!.value,
+        Switch(checked = SwitchBT.mCheckState!!.value,
             onCheckedChange = {
-                if (switchBT.myCheck!!.value == "On") {
-                    switchBT.myCheck!!.value= "Off"
-                    switchBT.mCheckState!!.value = false
+                if (SwitchBT.myCheck!!.value == "On") {
+                    SwitchBT.myCheck!!.value= "Off"
+                    SwitchBT.mCheckState!!.value = false
                     BtAdapter().bAdapter(context, true)
+                    Log.d("navigation", "toggled")
                 } else {
-                    switchBT.myCheck!!.value= "On"
-                    switchBT.mCheckState!!.value = true
                     BtAdapter().bAdapter(context, false)
+                    SwitchBT.myCheck!!.value= "On"
+                    SwitchBT.mCheckState!!.value = true
+
                 }
 
             })

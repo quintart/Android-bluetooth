@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.final_project.adapter
+package com.example.btmodule.mylib.adapter
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -24,6 +24,7 @@ class BtAdapter {
                  return
             }
             bluetoothAdapter.enable()
+            Log.d("adapter","enabled the bluetooth")
         }
         else{
                 bluetoothAdapter.disable()

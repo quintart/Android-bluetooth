@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.btmodule.mylib.broadcast.MyBtReceiver
 import com.example.final_project.ui.theme.FinalprojectTheme
 
 class MainActivity : ComponentActivity() {
