@@ -56,7 +56,7 @@ fun ConnectScreen(context: Context) {
     ) {
 
         Text(
-            text = SwitchBT.myCheck!!.value, 
+            text = SwitchBT.myCheck!!.value,
             fontSize = 25.sp,
             modifier = Modifier.align(Alignment.CenterVertically),
             fontWeight = FontWeight.Bold
