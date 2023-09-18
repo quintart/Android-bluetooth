@@ -4,9 +4,11 @@ package com.example.btmodule.mylib.adapter
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 
 
@@ -25,10 +27,26 @@ class BtAdapter {
             }
             bluetoothAdapter.enable()
             Log.d("adapter","enabled the bluetooth")
+            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+//            pairedDevices?.forEach { device ->
+//                val deviceName = device.name
+//                val deviceHardwareAddress = device.address // MAC address
+//                Log.d("Paired device","name : $deviceName, MAC : $deviceHardwareAddress")
+//            }
+
+            val list : ArrayList<BluetoothDevice> = ArrayList()
+            if (!pairedDevices?.isEmpty()!!) {
+                for (device: BluetoothDevice in pairedDevices) {
+                    list.add(device)
+                    Log.i("device", ""+device)
+                }
+            } else {
+                Toast.makeText(context,"no paired bluetooth devices found", Toast.LENGTH_SHORT).show()
+            }
         }
         else{
                 bluetoothAdapter.disable()
 
-            }
         }
     }
+}
