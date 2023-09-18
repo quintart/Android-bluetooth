@@ -28,12 +28,6 @@ class BtAdapter {
             bluetoothAdapter.enable()
             Log.d("adapter","enabled the bluetooth")
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
-//            pairedDevices?.forEach { device ->
-//                val deviceName = device.name
-//                val deviceHardwareAddress = device.address // MAC address
-//                Log.d("Paired device","name : $deviceName, MAC : $deviceHardwareAddress")
-//            }
-
             val list : ArrayList<BluetoothDevice> = ArrayList()
             if (!pairedDevices?.isEmpty()!!) {
                 for (device: BluetoothDevice in pairedDevices) {
