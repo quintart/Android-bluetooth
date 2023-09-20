@@ -27,15 +27,29 @@ class BtAdapter {
             }
             bluetoothAdapter.enable()
             Log.d("adapter","enabled the bluetooth")
-            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+            val pairedDevices = bluetoothAdapter.bondedDevices
 //            pairedDevices?.forEach { device ->
+            val state = bluetoothAdapter.state
+            Log.d("state", "$state")
 
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                // repeatOnLifecycle launches the block in a new coroutine every time the
+//                // lifecycle is in the STARTED state (or above) and cancels it when it's STOPPED.
+//                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                    // Trigger the flow and start listening for values.
+//                    // This happens when lifecycle is STARTED and stops
+//                    // collecting when the lifecycle is STOPPED
+//                    viewModel.someDataFlow.collect {
+//                        // Process item
+//                    }
+//                }
+//            }
 
-            val list : ArrayList<BluetoothDevice> = ArrayList()
-            if (!pairedDevices?.isEmpty()!!) {
+//            val list : ArrayList<BluetoothDevice> = ArrayList()
+            if (pairedDevices.size > 0 ) {
                 for (device: BluetoothDevice in pairedDevices) {
-                    list.add(device)
-                    Log.i("device", ""+device)
+                    val deviceName = device.name
+                    Log.d("device", "$deviceName")
                 }
             } else {
                 Toast.makeText(context,"no paired bluetooth devices found", Toast.LENGTH_SHORT).show()

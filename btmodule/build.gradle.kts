@@ -44,4 +44,5 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
     implementation ("androidx.compose.runtime:runtime-livedata:1.0.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
 }
