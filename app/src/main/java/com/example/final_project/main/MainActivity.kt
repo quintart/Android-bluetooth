@@ -16,16 +16,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import com.example.btmodule.mylib.broadcast.MyBtReceiver
 import com.example.final_project.ui.theme.FinalprojectTheme
+import android.Manifest
+import android.os.Build
+import androidx.annotation.RequiresApi
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        var intentFilter = IntentFilter()
+        val intentFilter = IntentFilter()
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         registerReceiver(MyBtReceiver(),intentFilter)
+
+        ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN),0)
 
         setContent {
             FinalprojectTheme {
@@ -48,7 +57,7 @@ class MainActivity : ComponentActivity() {
                                 fontSize = 35.sp, fontWeight = FontWeight.Medium
                             )
                         }
-                        ConnectScreen(applicationContext)
+                        ConnectScreen(applicationContext, application)
                     }
                 }
             }
