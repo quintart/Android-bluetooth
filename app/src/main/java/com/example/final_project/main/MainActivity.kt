@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.example.btmodule.mylib.adapter.BtAdapter
-import com.example.btmodule.mylib.broadcast.AvailableReceiver
+//import com.example.btmodule.mylib.broadcast.AvailableReceiver
 import com.example.btmodule.mylib.broadcast.MyBtReceiver
 import com.example.final_project.ui.theme.FinalprojectTheme
 
@@ -40,9 +40,9 @@ class MainActivity : ComponentActivity() {
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         registerReceiver(MyBtReceiver(),intentFilter)
 
-        val filter = IntentFilter()
-        filter.addAction(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(AvailableReceiver(), filter)
+//        val filter = IntentFilter()
+//        filter.addAction(BluetoothDevice.ACTION_FOUND)
+//        registerReceiver(AvailableReceiver(), filter)
 
         ActivityCompat.requestPermissions(this,
             arrayOf(Manifest.permission.BLUETOOTH_CONNECT,
