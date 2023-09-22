@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
 
@@ -33,6 +34,8 @@ class BtAdapter {
                 bluetoothAdapter.disable()
 
         }
+
+
     }
     fun getPaired(context: Context) : ArrayList<BluetoothDevice> {
         val list : ArrayList<BluetoothDevice> = ArrayList()
@@ -56,6 +59,15 @@ class BtAdapter {
         }
         return list
     }
-
+    fun getAvail(context: Context){
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ){return }
+        if (bluetoothAdapter.isEnabled)
+            bluetoothAdapter.startDiscovery()
+        Log.d("discover","started discovering")
+    }
 
 }
