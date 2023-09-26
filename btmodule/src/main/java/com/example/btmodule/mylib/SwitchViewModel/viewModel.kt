@@ -1,6 +1,7 @@
 package com.example.btmodule.mylib.SwitchViewModel
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
@@ -33,42 +34,71 @@ class BtViewModel @Inject constructor
         screenState.value.pairedDevicesList = bluetoothAdapter.getPaired()
     }
 
-    fun changeBtAction(){
+    fun changeBtAction() {
         bluetoothAdapter!!.changeBtAction()
+    }
+
+    fun deletePaired(device: BluetoothDevice) {
+        screenState.update { screen ->
+            screen.copy(pairedDevicesList = screen.pairedDevicesList - device)
+        }
+        device.javaClass.getMethod("removeBond").invoke(device)
     }
 
     fun fetchList() {
         if (bluetoothAdapter!!.isBtOn()) {
-            screenState.update { screenState ->
-                screenState.copy(pairedDevicesList = bluetoothAdapter!!.getPaired())
+            screenState.update { screen ->
+                screen.copy(
+                    pairedDevicesList = bluetoothAdapter!!.getPaired()
+                )
             }
         } else {
-            screenState.update { screenState ->
-                screenState.copy(pairedDevicesList = mutableSetOf())
+            screenState.update { screen ->
+                screen.copy(pairedDevicesList = mutableSetOf())
             }
         }
     }
 
     fun fetchAvailList() {
         bluetoothAdapter!!.getAvail()
+        screenState.update { screen ->
+            screen.copy(discoverState = true,)
+        }
+
+    }
+
+    fun stopScan() {
+        bluetoothAdapter.stopScan()
+        screenState.update { screen ->
+            screen.copy(discoverState = false)
+        }
+    }
+
+    fun editName(name: String) {
+        bluetoothAdapter.editName(name)
     }
 
     val broadCastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
             if (bluetoothAdapter.isBtOn()) {
-                screenState.update { screenState ->
-                    screenState.copy(
+                screenState.update { screen ->
+                    screen.copy(
                         btState = true,
                         pairedDevicesList = bluetoothAdapter.getPaired()
                     )
                 }
 
             } else {
-                screenState.update { screenState ->
-                    screenState.copy(btState = false, pairedDevicesList = mutableSetOf())
+                screenState.update { screen ->
+                    screen.copy(btState = false, pairedDevicesList = mutableSetOf())
                 }
             }
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun connect(device: BluetoothDevice) {
+        device.createBond()
     }
 
     val btDeviceReceiver = object : BroadcastReceiver() {
@@ -86,9 +116,47 @@ class BtViewModel @Inject constructor
                     ) {
                         if (device?.name != null) {
                             if (device !in screenState.value.pairedDevicesList) {
-                                screenState.value.availableDeviceList =
-                                    screenState.value.availableDeviceList + device
+                                screenState.update { screen ->
+                                    screen.copy(
+                                        availableDeviceList = screenState.value.availableDeviceList + device
+                                    )
+                                }
                             }
+                        }
+                    }
+                }
+
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    if (ActivityCompat.checkSelfPermission(
+                            application,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        if (device != null) {
+                            screenState.update { screen ->
+                                screen.copy(
+                                    pairedDevicesList = bluetoothAdapter.getPaired(),
+                                    availableDeviceList = screenState.value.availableDeviceList - device
+
+                                )
+                            }
+                            Log.d("ListUpdate",device.name)
+                        }
+                    }
+                }
+
+                BluetoothDevice.ACTION_NAME_CHANGED -> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    if (ActivityCompat.checkSelfPermission(
+                            application,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        if (device != null) {
+                            Log.d("name Change",device.name)
                         }
                     }
                 }

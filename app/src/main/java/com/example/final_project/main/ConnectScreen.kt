@@ -4,8 +4,6 @@ package com.example.final_project.main
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Application
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
@@ -23,13 +21,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,14 +59,40 @@ import com.example.final_project.R
 @Composable
 fun Navigation(cont:Context, viewModel: BtViewModel) {
     val navController = rememberNavController()
-    val device : BluetoothDevice? = null
 
     NavHost(navController = navController, startDestination = "ConnectScreen" ){
         composable(route = "ConnectScreen") {
             ConnectScreen(viewModel, navController = navController)
         }
-        composable(route = "deviceDetail/{device}"){
-            deviceDetails(device = device, context = cont)
+        composable(route = "editDeviceName/{deviceName}",
+            arguments = listOf(
+                navArgument("deviceName"){
+                    type = NavType.StringType
+                }
+            )
+        )
+            {entry ->
+                entry.arguments?.getString("deviceName")?.let { EditName(deviceName = it,viewModel, navController) }
+
+            }
+        composable(route = "deviceDetail/{name}/{class}",
+            arguments = listOf(
+                navArgument("name"){
+                    type = NavType.StringType
+                    defaultValue = "No Device"
+                    nullable = true
+                },
+                navArgument("classType"){
+                    type = androidx.navigation.NavType.StringType
+                    defaultValue = "0000"
+                    nullable = true
+                }
+            )
+        ){ entry ->
+            val name = entry.arguments?.getString("name")
+            val classType = entry.arguments?.getString("classType")
+            deviceDetails(cont, name = name, classType, navController, viewModel)
+
         }
 
     }
@@ -88,6 +119,23 @@ fun ConnectScreen( viewModel: BtViewModel = hiltViewModel(), navController: NavC
                 text = "Bluetooth",
                 fontSize = 35.sp, fontWeight = FontWeight.Medium
             )
+            if(state.value.btState){
+                Spacer(modifier = Modifier.weight(1f))
+                Log.d("SCAN", state.value.discoverState.toString())
+                if(!state.value.discoverState) {
+                    Button(onClick = { viewModel.fetchAvailList()
+                    }) {
+                        Text(text = "Scan")
+                    }
+
+                }else{
+                    Button(onClick = {
+                        viewModel.stopScan()
+                    }) {
+                        Text(text = "Stop")
+                    }
+                }
+            }
         }
 
         Row(
@@ -115,10 +163,11 @@ fun ConnectScreen( viewModel: BtViewModel = hiltViewModel(), navController: NavC
                     viewModel.changeBtAction()
                 })
         }
+        if (state.value.btState){
+            getPairedDevice(controller = controller, viewModel, navController)
+            getAvailableDevice(controller = controller, viewModel)
+        }
 
-        getPairedDevice(controller = controller, viewModel, navController)
-
-    getAvailableDevice(controller = controller, viewModel)
     }
 }
 
@@ -156,10 +205,16 @@ fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
                                 "deviceDetail/${
                                     state.value.pairedDevicesList.elementAt(
                                         it
-                                    )
-                                }"
+                                    ).name
+                                }/${state.value.pairedDevicesList.elementAt(it).bluetoothClass}"
                             )
                         }) {
+                        DisplayIcon(device = vModel.state.value.pairedDevicesList
+                            .elementAt(it).bluetoothClass.toString() ,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.CenterVertically)
+                                .clickable { TODO() })
                         Text(
                             text = state.value.pairedDevicesList.elementAt(it).name,
                             fontSize = 18.sp,
@@ -168,12 +223,25 @@ fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
                         Spacer(modifier = Modifier.weight(1f))
                         Log.d("type",vModel.state.value.pairedDevicesList
                             .elementAt(it).bluetoothClass.toString())
-                        DisplayIcon(device = vModel.state.value.pairedDevicesList
-                            .elementAt(it).bluetoothClass.toString() ,
+
+                        Image(
+                            painter = painterResource(id = R.drawable.delete_24),
+                            contentDescription = null,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(26.dp)
                                 .align(Alignment.CenterVertically)
-                                .clickable { TODO() })
+                                .clickable {
+                                    try {
+                                        vModel.deletePaired(
+                                            state.value.pairedDevicesList.elementAt(
+                                                it
+                                            )
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.d("Tag", "Delete paired device")
+                                    }
+                                }
+                        )
                     }
                 }
             }
@@ -185,7 +253,7 @@ fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
 @Composable
 fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
     val state = vModel.state.collectAsState()
-    vModel.fetchAvailList()
+//    vModel.fetchAvailList()
     if (ActivityCompat.checkSelfPermission(
             controller,
             Manifest.permission.BLUETOOTH_CONNECT
@@ -196,7 +264,8 @@ fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
                 text = "Available Devices",
                 fontSize = 18.sp,
                 modifier = Modifier
-                    .padding(start = 20.dp, top = 10.dp, bottom = 15.dp)
+                    .padding(start = 20.dp, top = 10.dp, bottom = 15.dp),
+                fontWeight = FontWeight.Bold
             )
         LazyColumn {
             if (state.value.btState and
@@ -209,8 +278,7 @@ fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
                             )
                             .height(50.dp)
                             .clickable {
-                                TODO("Add The logic to pair the device")
-                            }
+                                vModel.connect(state.value.availableDeviceList.elementAt(it))                            }
                     ) {
 
                         Text(
@@ -289,14 +357,103 @@ fun DisplayIcon(device: String, modifier: Modifier){
 }
 
 @Composable
-fun deviceDetails(device: BluetoothDevice?, context: Context){
+fun deviceDetails( context: Context, name : String?,classType : String?, navController: NavController, viewModel: BtViewModel){
     if (ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.BLUETOOTH_CONNECT
         ) == PackageManager.PERMISSION_GRANTED
     )
-    Log.d("Detail", device!!.name)
-    Text(text = "hello",
-        fontSize = 30.sp,
+        name?.let { Log.d("Detail", it) }
+    Column(modifier = Modifier
+        .fillMaxWidth()) {
+        Image(
+            painter = painterResource(id = R.drawable.keyboard_arrow_left_24),
+            contentDescription = null,
+            modifier = Modifier
+                .size(46.dp)
+                .padding(start = 4.dp, top = 3.dp)
+                .align(Alignment.Start)
+                .clickable {
+                    navController.navigate("ConnectScreen")
+                }
         )
+
+        Text(
+            text = "$name",
+            fontSize = 30.sp,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(25.dp)
+        )
+
+//        Image(
+//            painter = painterResource(id = R.drawable.),
+//            contentDescription = null,
+//            modifier = Modifier
+//                .size(46.dp)
+//                .padding(start = 4.dp, top = 3.dp)
+//                .align(Alignment.CenterHorizontally)
+//                .clickable {
+//                    navController.navigate("ConnectScreen")
+//                }
+//        )
+        if (classType != null) {
+            DisplayIcon(
+                device = classType,
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+
+            Row (modifier = Modifier
+                .padding(
+                    start = 20.dp, top = 60.dp
+                )
+                .height(50.dp)){
+                Button(onClick = { navController.navigate("editDeviceName/${name}") }) {
+                    Icon(painter = painterResource(id = R.drawable.edit_24), contentDescription = null)
+                    Text(text = "Rename")
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+                Button(onClick = { /*TODO*/ }) {
+                    Icon(painter = painterResource(id = R.drawable.bluetooth_24), contentDescription = null)
+                    Text(text = "Connect")
+                }
+
+//                Spacer(modifier = Modifier.weight(1f))
+//                Button(onClick = { /*TODO*/ }) {
+//                    Icon(painter = painterResource(id = R.drawable.arrow_outward_24), contentDescription = null)
+//                    Text(text = "Unpair")
+//                }
+
+            }
+
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditName(deviceName : String, viewModel: BtViewModel, navController: NavController){
+    var text by remember{
+        mutableStateOf(deviceName)
+    }
+
+    TextField(value = text ,
+        onValueChange = {
+            text = it
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Button(onClick = {
+        viewModel.editName(text)
+        navController.navigate("ConnectScreen")
+    }, modifier = Modifier
+        .padding(50.dp)) {
+        Text(text = "Set Name")
+    }
 }

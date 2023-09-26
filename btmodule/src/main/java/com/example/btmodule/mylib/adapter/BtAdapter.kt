@@ -3,6 +3,7 @@
 package com.example.btmodule.mylib.adapter
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -47,8 +48,6 @@ class BtAdapter(private val context: Context) {
     }
 
     fun getPaired() : Set<BluetoothDevice> {
-        val list : Set<BluetoothDevice> = mutableSetOf()
-
         if (ActivityCompat.checkSelfPermission(
                  context,
                 Manifest.permission.BLUETOOTH_CONNECT
@@ -56,16 +55,7 @@ class BtAdapter(private val context: Context) {
         ) {
 
         }
-        val pairedDevices =
-            bluetoothAdapter.bondedDevices
-
-        if (pairedDevices.size > 0 ) {
-            for (device: BluetoothDevice in pairedDevices) {
-                val deviceName = device.name
-                Log.d("device", deviceName)
-
-            }
-        }
+        val pairedDevices = bluetoothAdapter.bondedDevices
         return pairedDevices
     }
     fun getAvail(){
@@ -79,6 +69,22 @@ class BtAdapter(private val context: Context) {
             }
             bluetoothAdapter.startDiscovery()
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun stopScan() {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        bluetoothAdapter.cancelDiscovery()    }
+
+    @SuppressLint("MissingPermission")
+    fun editName(name : String){
+        bluetoothAdapter.name = name
     }
 
 }

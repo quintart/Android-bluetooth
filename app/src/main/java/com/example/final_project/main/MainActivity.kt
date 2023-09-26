@@ -4,32 +4,18 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.btmodule.mylib.SwitchViewModel.BtViewModel
-import com.example.btmodule.mylib.broadcast.MyBtReceiver
 import com.example.final_project.ui.theme.FinalprojectTheme
 import androidx.lifecycle.viewmodel.compose.*
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
         val filter = IntentFilter()
         filter.addAction(BluetoothDevice.ACTION_FOUND)
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         registerReceiver(vModel.btDeviceReceiver, filter)
 
         ActivityCompat.requestPermissions(this,
@@ -69,16 +56,16 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
-    override fun onDestroy() {
-        unregisterReceiver(MyBtReceiver())
-        super.onDestroy()
+    override fun onResume() {
+        super.onResume()
+        vModel.fetchList()
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        getPairedDevice(controller = applicationContext,  vModel = vModel)
-//    }
+    override fun onDestroy() {
+        unregisterReceiver(vModel.broadCastReceiver)
+        unregisterReceiver(vModel.btDeviceReceiver)
+        super.onDestroy()
+    }
 
 
 }
