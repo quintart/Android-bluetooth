@@ -385,18 +385,7 @@ fun deviceDetails( context: Context, name : String?,classType : String?, navCont
                 .align(Alignment.CenterHorizontally)
                 .padding(25.dp)
         )
-
-//        Image(
-//            painter = painterResource(id = R.drawable.),
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(46.dp)
-//                .padding(start = 4.dp, top = 3.dp)
-//                .align(Alignment.CenterHorizontally)
-//                .clickable {
-//                    navController.navigate("ConnectScreen")
-//                }
-//        )
+        
         if (classType != null) {
             DisplayIcon(
                 device = classType,
