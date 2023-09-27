@@ -1,10 +1,10 @@
 package com.example.btmodule.mylib.SwitchViewModel
 
-import androidx.compose.runtime.MutableState
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-
-object SwitchBT : ViewModel(){
-    var myCheck : MutableState<String>? = null
-    var mCheckState : MutableState<Boolean>? = null
-}
+import android.bluetooth.BluetoothDevice
+data class ScreenState(
+    var btState: Boolean = false,
+    var discoverState : Boolean = false,
+    var deviceName : String = "default",
+    var pairedDevicesList: Set<BluetoothDevice> = mutableSetOf(),
+    var availableDeviceList : Set<BluetoothDevice> = mutableSetOf()
+)
