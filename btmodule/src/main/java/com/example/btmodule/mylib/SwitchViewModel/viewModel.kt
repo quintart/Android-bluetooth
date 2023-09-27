@@ -3,6 +3,7 @@ package com.example.btmodule.mylib.SwitchViewModel
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -35,7 +36,7 @@ class BtViewModel @Inject constructor
     }
 
     fun changeBtAction() {
-        bluetoothAdapter!!.changeBtAction()
+        bluetoothAdapter.changeBtAction()
     }
 
     fun deletePaired(device: BluetoothDevice) {
@@ -46,10 +47,10 @@ class BtViewModel @Inject constructor
     }
 
     fun fetchList() {
-        if (bluetoothAdapter!!.isBtOn()) {
+        if (bluetoothAdapter.isBtOn()) {
             screenState.update { screen ->
                 screen.copy(
-                    pairedDevicesList = bluetoothAdapter!!.getPaired()
+                    pairedDevicesList = bluetoothAdapter.getPaired()
                 )
             }
         } else {
@@ -60,9 +61,9 @@ class BtViewModel @Inject constructor
     }
 
     fun fetchAvailList() {
-        bluetoothAdapter!!.getAvail()
+        bluetoothAdapter.getAvail()
         screenState.update { screen ->
-            screen.copy(discoverState = true,)
+            screen.copy(discoverState = true)
         }
 
     }
@@ -75,7 +76,11 @@ class BtViewModel @Inject constructor
     }
 
     fun editName(name: String) {
-        bluetoothAdapter.editName(name)
+        bluetoothAdapter.editDeviceName(name)
+    }
+
+    fun discoverable(){
+        bluetoothAdapter.discoverable()
     }
 
     val broadCastReceiver = object : BroadcastReceiver() {
@@ -103,9 +108,8 @@ class BtViewModel @Inject constructor
 
     val btDeviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
-            val action: String? = intent?.action
 
-            when (action) {
+            when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
                     val device: BluetoothDevice? =
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
@@ -146,18 +150,28 @@ class BtViewModel @Inject constructor
                         }
                     }
                 }
-
-                BluetoothDevice.ACTION_NAME_CHANGED -> {
-                    val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    if (ActivityCompat.checkSelfPermission(
-                            application,
-                            Manifest.permission.BLUETOOTH_CONNECT
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (device != null) {
-                            Log.d("name Change",device.name)
+                BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
+                    Log.d("Discovery", "Started")
+                    if (bluetoothAdapter.isDiscovering()) {
+                        screenState.update { screenState ->
+                            screenState.copy(discoverState = true)
                         }
+                    }
+                }
+
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    Log.d("Discovery", "Finished")
+
+                    if (!bluetoothAdapter.isDiscovering()) {
+                        screenState.update { screenState ->
+                            screenState.copy(discoverState = false)
+                        }
+                    }
+                }
+
+                BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED -> {
+                    screenState.update { screenState ->
+                        screenState.copy(deviceName = bluetoothAdapter.getDeviceName())
                     }
                 }
             }

@@ -164,10 +164,29 @@ fun ConnectScreen( viewModel: BtViewModel = hiltViewModel(), navController: NavC
                 })
         }
         if (state.value.btState){
+            makeDeviceDiscoverable(viewModel, navController)
             getPairedDevice(controller = controller, viewModel, navController)
             getAvailableDevice(controller = controller, viewModel)
         }
 
+    }
+}
+
+@Composable
+fun makeDeviceDiscoverable(vModel: BtViewModel, navController: NavController){
+    val state = vModel.state.collectAsState()
+    Row(modifier = Modifier
+        .padding(start = 20.dp, top = 30.dp, end = 20.dp)) {
+        Column(modifier = Modifier
+            .clickable { navController.navigate("editDeviceName/${state.value.deviceName}") }) {
+            Text(text = "Your Device")
+            Text(text = state.value.deviceName,
+                fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Button(onClick = { vModel.discoverable() }) {
+            Text(text = "Make Discoverable")
+        }
     }
 }
 
@@ -201,13 +220,13 @@ fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
                         )
                         .height(50.dp)
                         .clickable {
-                            navController.navigate(
-                                "deviceDetail/${
-                                    state.value.pairedDevicesList.elementAt(
-                                        it
-                                    ).name
-                                }/${state.value.pairedDevicesList.elementAt(it).bluetoothClass}"
-                            )
+//                            navController.navigate(
+//                                "deviceDetail/${
+//                                    state.value.pairedDevicesList.elementAt(
+//                                        it
+//                                    ).name
+//                                }/${state.value.pairedDevicesList.elementAt(it).bluetoothClass}"
+//                            )
                         }) {
                         DisplayIcon(device = vModel.state.value.pairedDevicesList
                             .elementAt(it).bluetoothClass.toString() ,
@@ -278,7 +297,8 @@ fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
                             )
                             .height(50.dp)
                             .clickable {
-                                vModel.connect(state.value.availableDeviceList.elementAt(it))                            }
+                                vModel.connect(state.value.availableDeviceList.elementAt(it))
+                            }
                     ) {
 
                         Text(
@@ -385,7 +405,7 @@ fun deviceDetails( context: Context, name : String?,classType : String?, navCont
                 .align(Alignment.CenterHorizontally)
                 .padding(25.dp)
         )
-        
+
         if (classType != null) {
             DisplayIcon(
                 device = classType,
