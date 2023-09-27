@@ -404,6 +404,7 @@ fun deviceDetails( context: Context, name : String?,classType : String?, navCont
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(25.dp)
+
         )
 
         if (classType != null) {

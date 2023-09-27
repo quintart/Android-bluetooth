@@ -28,6 +28,7 @@ class BtAdapter(private val context: Context) {
                     Toast.makeText(context,"Turn off bluetooth from you device settings.", Toast.LENGTH_LONG).show()
                 }else{
                     bluetoothAdapter.disable()
+
                 }
             } else {
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
