@@ -4,6 +4,7 @@ package com.example.final_project.main
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
@@ -75,25 +76,25 @@ fun Navigation(cont:Context, viewModel: BtViewModel) {
                 entry.arguments?.getString("deviceName")?.let { EditName(deviceName = it,viewModel, navController) }
 
             }
-        composable(route = "deviceDetail/{name}/{class}",
-            arguments = listOf(
-                navArgument("name"){
-                    type = NavType.StringType
-                    defaultValue = "No Device"
-                    nullable = true
-                },
-                navArgument("classType"){
-                    type = androidx.navigation.NavType.StringType
-                    defaultValue = "0000"
-                    nullable = true
-                }
-            )
-        ){ entry ->
-            val name = entry.arguments?.getString("name")
-            val classType = entry.arguments?.getString("classType")
-            deviceDetails(cont, name = name, classType, navController, viewModel)
-
-        }
+//        composable(route = "deviceDetail/{name}/{class}",
+//            arguments = listOf(
+//                navArgument("name"){
+//                    type = NavType.StringType
+//                    defaultValue = "No Device"
+//                    nullable = true
+//                },
+//                navArgument("classType"){
+//                    type = androidx.navigation.NavType.IntType
+//                    defaultValue = "0000"
+//                    nullable = true
+//                }
+//            )
+//        ){ entry ->
+//            val name = entry.arguments?.getString("name")
+//            val classType = entry.arguments?.getInt("classType")
+////            deviceDetails(cont, name = name, classType, navController, viewModel)
+//
+//        }
 
     }
 }
@@ -229,7 +230,7 @@ fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
 //                            )
                         }) {
                         DisplayIcon(device = vModel.state.value.pairedDevicesList
-                            .elementAt(it).bluetoothClass.toString() ,
+                            .elementAt(it).bluetoothClass.deviceClass ,
                             modifier = Modifier
                                 .size(24.dp)
                                 .align(Alignment.CenterVertically)
@@ -312,7 +313,7 @@ fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
 
                         DisplayIcon(
                             device = vModel.state.value.availableDeviceList
-                                .elementAt(it).bluetoothClass.toString(),
+                                .elementAt(it).bluetoothClass.deviceClass,
                             modifier = Modifier
                                 .size(24.dp)
                                 .align(Alignment.CenterVertically)
@@ -338,37 +339,37 @@ fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
 }
 
 @Composable
-fun DisplayIcon(device: String, modifier: Modifier){
+fun DisplayIcon(device: Int, modifier: Modifier){
     when (device) {
-        "240404" -> Image(
+        BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES -> Image(
             painter = painterResource(id = R.drawable.round_headphones_24),
             contentDescription = null,
             modifier = modifier
         )
 
-        "24010c" -> Image(
+        BluetoothClass.Device.COMPUTER_LAPTOP -> Image(
             painter = painterResource(id = R.drawable.laptop_24),
             contentDescription = null,
             modifier = modifier
         )
 
-        "240704" -> Image(
+        BluetoothClass.Device.WEARABLE_WRIST_WATCH -> Image(
             painter = painterResource(id = R.drawable.watch_24),
             contentDescription = null,
             modifier = modifier
         )
 
-        "5a020c" -> Image(
+        BluetoothClass.Device.PHONE_SMART -> Image(
             painter = painterResource(id = R.drawable.phone_android_24),
             contentDescription = null,
             modifier = modifier
         )
 
-        "7a020c" -> Image(
-            painter = painterResource(id = R.drawable.phone_iphone_24),
-            contentDescription = null,
-            modifier = modifier
-        )
+//        "7a020c" -> Image(
+//            painter = painterResource(id = R.drawable.phone_iphone_24),
+//            contentDescription = null,
+//            modifier = modifier
+//        )
 
         else -> Image(painter = painterResource(id = R.drawable.device_unknown_24), contentDescription = null,
             modifier = modifier
@@ -377,7 +378,7 @@ fun DisplayIcon(device: String, modifier: Modifier){
 }
 
 @Composable
-fun deviceDetails( context: Context, name : String?,classType : String?, navController: NavController, viewModel: BtViewModel){
+fun deviceDetails( context: Context, name : String?,classType : Int?, navController: NavController, viewModel: BtViewModel){
     if (ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.BLUETOOTH_CONNECT
@@ -406,7 +407,6 @@ fun deviceDetails( context: Context, name : String?,classType : String?, navCont
                 .padding(25.dp)
 
         )
-
         if (classType != null) {
             DisplayIcon(
                 device = classType,
@@ -415,6 +415,7 @@ fun deviceDetails( context: Context, name : String?,classType : String?, navCont
                     .align(Alignment.CenterHorizontally)
             )
         }
+
 
             Row (modifier = Modifier
                 .padding(
