@@ -4,7 +4,6 @@ package com.example.final_project.main
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
@@ -14,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,10 +26,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,9 +47,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.btmodule.mylib.adapter.BtAdapter
-import com.example.btmodule.mylib.SwitchViewModel.BtViewModel
-import com.example.btmodule.mylib.SwitchViewModel.ScreenState
+import com.example.btmodule.mylib.viewmodel.BtViewModel
 import com.example.final_project.R
 
 @Composable
@@ -91,7 +85,7 @@ fun Navigation(cont:Context, viewModel: BtViewModel) {
         ){ entry ->
             val name = entry.arguments?.getString("name")
             val classType = entry.arguments?.getString("classType")
-            deviceDetails(cont, name = name, classType, navController, viewModel)
+            DeviceDetails(cont, name = name, classType, navController, viewModel)
 
         }
 
@@ -164,16 +158,16 @@ fun ConnectScreen( viewModel: BtViewModel = hiltViewModel(), navController: NavC
                 })
         }
         if (state.value.btState){
-            makeDeviceDiscoverable(viewModel, navController)
-            getPairedDevice(controller = controller, viewModel, navController)
-            getAvailableDevice(controller = controller, viewModel)
+            MakeDeviceDiscoverable(viewModel, navController)
+            GetPairedDevice(controller = controller, viewModel, navController)
+            GetAvailableDevice(controller = controller, viewModel)
         }
 
     }
 }
 
 @Composable
-fun makeDeviceDiscoverable(vModel: BtViewModel, navController: NavController){
+fun MakeDeviceDiscoverable(vModel: BtViewModel, navController: NavController){
     val state = vModel.state.collectAsState()
     Row(modifier = Modifier
         .padding(start = 20.dp, top = 30.dp, end = 20.dp)) {
@@ -192,7 +186,7 @@ fun makeDeviceDiscoverable(vModel: BtViewModel, navController: NavController){
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: NavController){
+fun GetPairedDevice(controller: Context, vModel: BtViewModel, navController: NavController){
     val state = vModel.state.collectAsState()
     vModel.fetchList()
     if (ActivityCompat.checkSelfPermission(
@@ -270,7 +264,7 @@ fun getPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun getAvailableDevice(controller: Context, vModel: BtViewModel) {
+fun GetAvailableDevice(controller: Context, vModel: BtViewModel) {
     val state = vModel.state.collectAsState()
 //    vModel.fetchAvailList()
     if (ActivityCompat.checkSelfPermission(
@@ -377,7 +371,7 @@ fun DisplayIcon(device: String, modifier: Modifier){
 }
 
 @Composable
-fun deviceDetails( context: Context, name : String?,classType : String?, navController: NavController, viewModel: BtViewModel){
+fun DeviceDetails( context: Context, name : String?,classType : String?, navController: NavController, viewModel: BtViewModel){
     if (ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.BLUETOOTH_CONNECT

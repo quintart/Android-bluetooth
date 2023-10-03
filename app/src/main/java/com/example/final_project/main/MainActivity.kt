@@ -15,7 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import com.example.btmodule.mylib.SwitchViewModel.BtViewModel
+import com.example.btmodule.mylib.viewmodel.BtViewModel
 import com.example.final_project.ui.theme.FinalprojectTheme
 import androidx.lifecycle.viewmodel.compose.*
 import dagger.hilt.android.AndroidEntryPoint

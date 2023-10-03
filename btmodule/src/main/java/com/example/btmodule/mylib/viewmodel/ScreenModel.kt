@@ -1,7 +1,7 @@
-package com.example.btmodule.mylib.SwitchViewModel
+package com.example.btmodule.mylib.viewmodel
 
 import android.bluetooth.BluetoothDevice
-data class ScreenState(
+data class ScreenModel(
     var btState: Boolean = false,
     var discoverState : Boolean = false,
     var deviceName : String = "default",

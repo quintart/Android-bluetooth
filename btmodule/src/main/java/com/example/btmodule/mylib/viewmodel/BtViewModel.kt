@@ -1,4 +1,6 @@
-package com.example.btmodule.mylib.SwitchViewModel
+@file:Suppress("DEPRECATION")
+
+package com.example.btmodule.mylib.viewmodel
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -27,12 +29,12 @@ class BtViewModel @Inject constructor
     private val application: Application) : ViewModel() {
 
 
-    private val screenState = MutableStateFlow(ScreenState())
-    val state: StateFlow<ScreenState> = screenState.asStateFlow()
+    private val screenModel = MutableStateFlow(ScreenModel())
+    val state: StateFlow<ScreenModel> = screenModel.asStateFlow()
 
     init {
-        screenState.value.btState = bluetoothAdapter.isBtOn()
-        screenState.value.pairedDevicesList = bluetoothAdapter.getPaired()
+        screenModel.value.btState = bluetoothAdapter.isBtOn()
+        screenModel.value.pairedDevicesList = bluetoothAdapter.getPaired()
     }
 
     fun changeBtAction() {
@@ -40,7 +42,7 @@ class BtViewModel @Inject constructor
     }
 
     fun deletePaired(device: BluetoothDevice) {
-        screenState.update { screen ->
+        screenModel.update { screen ->
             screen.copy(pairedDevicesList = screen.pairedDevicesList - device)
         }
         device.javaClass.getMethod("removeBond").invoke(device)
@@ -48,13 +50,13 @@ class BtViewModel @Inject constructor
 
     fun fetchList() {
         if (bluetoothAdapter.isBtOn()) {
-            screenState.update { screen ->
+            screenModel.update { screen ->
                 screen.copy(
                     pairedDevicesList = bluetoothAdapter.getPaired()
                 )
             }
         } else {
-            screenState.update { screen ->
+            screenModel.update { screen ->
                 screen.copy(pairedDevicesList = mutableSetOf())
             }
         }
@@ -62,7 +64,7 @@ class BtViewModel @Inject constructor
 
     fun fetchAvailList() {
         bluetoothAdapter.getAvail()
-        screenState.update { screen ->
+        screenModel.update { screen ->
             screen.copy(discoverState = true)
         }
 
@@ -70,7 +72,7 @@ class BtViewModel @Inject constructor
 
     fun stopScan() {
         bluetoothAdapter.stopScan()
-        screenState.update { screen ->
+        screenModel.update { screen ->
             screen.copy(discoverState = false)
         }
     }
@@ -86,7 +88,7 @@ class BtViewModel @Inject constructor
     val broadCastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
             if (bluetoothAdapter.isBtOn()) {
-                screenState.update { screen ->
+                screenModel.update { screen ->
                     screen.copy(
                         btState = true,
                         pairedDevicesList = bluetoothAdapter.getPaired()
@@ -94,7 +96,7 @@ class BtViewModel @Inject constructor
                 }
 
             } else {
-                screenState.update { screen ->
+                screenModel.update { screen ->
                     screen.copy(btState = false, pairedDevicesList = mutableSetOf())
                 }
             }
@@ -119,10 +121,10 @@ class BtViewModel @Inject constructor
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         if (device?.name != null) {
-                            if (device !in screenState.value.pairedDevicesList) {
-                                screenState.update { screen ->
+                            if (device !in screenModel.value.pairedDevicesList) {
+                                screenModel.update { screen ->
                                     screen.copy(
-                                        availableDeviceList = screenState.value.availableDeviceList + device
+                                        availableDeviceList = screenModel.value.availableDeviceList + device
                                     )
                                 }
                             }
@@ -139,10 +141,10 @@ class BtViewModel @Inject constructor
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         if (device != null) {
-                            screenState.update { screen ->
+                            screenModel.update { screen ->
                                 screen.copy(
                                     pairedDevicesList = bluetoothAdapter.getPaired(),
-                                    availableDeviceList = screenState.value.availableDeviceList - device
+                                    availableDeviceList = screenModel.value.availableDeviceList - device
 
                                 )
                             }
@@ -153,7 +155,7 @@ class BtViewModel @Inject constructor
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
                     Log.d("Discovery", "Started")
                     if (bluetoothAdapter.isDiscovering()) {
-                        screenState.update { screenState ->
+                        screenModel.update { screenState ->
                             screenState.copy(discoverState = true)
                         }
                     }
@@ -163,14 +165,14 @@ class BtViewModel @Inject constructor
                     Log.d("Discovery", "Finished")
 
                     if (!bluetoothAdapter.isDiscovering()) {
-                        screenState.update { screenState ->
+                        screenModel.update { screenState ->
                             screenState.copy(discoverState = false)
                         }
                     }
                 }
 
                 BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED -> {
-                    screenState.update { screenState ->
+                    screenModel.update { screenState ->
                         screenState.copy(deviceName = bluetoothAdapter.getDeviceName())
                     }
                 }
