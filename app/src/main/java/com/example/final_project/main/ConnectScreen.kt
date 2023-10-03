@@ -71,26 +71,6 @@ fun Navigation(cont:Context, viewModel: BtViewModel) {
                 entry.arguments?.getString("deviceName")?.let { EditName(deviceName = it,viewModel, navController) }
 
             }
-//        composable(route = "deviceDetail/{name}/{class}",
-//            arguments = listOf(
-//                navArgument("name"){
-//                    type = NavType.StringType
-//                    defaultValue = "No Device"
-//                    nullable = true
-//                },
-//                navArgument("classType"){
-//                    type = androidx.navigation.NavType.IntType
-//                    defaultValue = "0000"
-//                    nullable = true
-//                }
-//            )
-//        ){ entry ->
-//            val name = entry.arguments?.getString("name")
-//            val classType = entry.arguments?.getInt("classType")
-////            deviceDetails(cont, name = name, classType, navController, viewModel)
-//
-//        }
-
     }
 }
 
@@ -215,15 +195,7 @@ fun GetPairedDevice(controller: Context, vModel: BtViewModel, navController: Nav
                             start = 20.dp, top = 5.dp, bottom = 10.dp, end = 20.dp
                         )
                         .height(50.dp)
-                        .clickable {
-//                            navController.navigate(
-//                                "deviceDetail/${
-//                                    state.value.pairedDevicesList.elementAt(
-//                                        it
-//                                    ).name
-//                                }/${state.value.pairedDevicesList.elementAt(it).bluetoothClass}"
-//                            )
-                        }) {
+                    ) {
                         DisplayIcon(device = vModel.state.value.pairedDevicesList
                             .elementAt(it).bluetoothClass.deviceClass ,
                             modifier = Modifier
@@ -359,13 +331,6 @@ fun DisplayIcon(device: Int, modifier: Modifier){
             contentDescription = null,
             modifier = modifier
         )
-
-//        "7a020c" -> Image(
-//            painter = painterResource(id = R.drawable.phone_iphone_24),
-//            contentDescription = null,
-//            modifier = modifier
-//        )
-
         else -> Image(painter = painterResource(id = R.drawable.device_unknown_24), contentDescription = null,
             modifier = modifier
         )
